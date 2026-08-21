@@ -1,0 +1,71 @@
+{
+  "Comment": "Raw S3 upload -> crawl -> transform -> crawl curated zone",
+  "StartAt": "StartRawCrawler",
+  "States": {
+    "StartRawCrawler": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:glue:startCrawler",
+      "Parameters": { "Name": "${raw_crawler_name}" },
+      "Catch": [{ "ErrorEquals": ["Glue.CrawlerRunningException"], "Next": "WaitRawCrawler" }],
+      "Next": "WaitRawCrawler"
+    },
+    "WaitRawCrawler": {
+      "Type": "Wait",
+      "Seconds": 20,
+      "Next": "GetRawCrawlerStatus"
+    },
+    "GetRawCrawlerStatus": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:glue:getCrawler",
+      "Parameters": { "Name": "${raw_crawler_name}" },
+      "Next": "IsRawCrawlerReady"
+    },
+    "IsRawCrawlerReady": {
+      "Type": "Choice",
+      "Choices": [
+        { "Variable": "$.Crawler.State", "StringEquals": "READY", "Next": "RunEtlJob" }
+      ],
+      "Default": "WaitRawCrawler"
+    },
+    "RunEtlJob": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": { "JobName": "${glue_job_name}" },
+      "Next": "StartCuratedCrawler",
+      "Catch": [{ "ErrorEquals": ["States.ALL"], "Next": "PipelineFailed" }]
+    },
+    "StartCuratedCrawler": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:glue:startCrawler",
+      "Parameters": { "Name": "${curated_crawler_name}" },
+      "Catch": [{ "ErrorEquals": ["Glue.CrawlerRunningException"], "Next": "WaitCuratedCrawler" }],
+      "Next": "WaitCuratedCrawler"
+    },
+    "WaitCuratedCrawler": {
+      "Type": "Wait",
+      "Seconds": 20,
+      "Next": "GetCuratedCrawlerStatus"
+    },
+    "GetCuratedCrawlerStatus": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:glue:getCrawler",
+      "Parameters": { "Name": "${curated_crawler_name}" },
+      "Next": "IsCuratedCrawlerReady"
+    },
+    "IsCuratedCrawlerReady": {
+      "Type": "Choice",
+      "Choices": [
+        { "Variable": "$.Crawler.State", "StringEquals": "READY", "Next": "PipelineSucceeded" }
+      ],
+      "Default": "WaitCuratedCrawler"
+    },
+    "PipelineSucceeded": {
+      "Type": "Succeed"
+    },
+    "PipelineFailed": {
+      "Type": "Fail",
+      "Error": "EtlJobFailed",
+      "Cause": "The Glue ETL job did not complete successfully - check the job run's error log in the Glue console."
+    }
+  }
+}

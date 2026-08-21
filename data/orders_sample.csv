@@ -1,0 +1,11 @@
+order_id,customer,amount,order_date,region
+1001,Alice Chen,89.99,2026-01-03,us-east
+1002,Bruno Silva,42.50,2026-01-03,eu-west
+1003,Chidi Okafor,213.10,2026-01-04,us-east
+1004,Dana Kim,15.75,2026-01-05,ap-south
+1005,Eva Novak,120.00,2026-01-05,eu-west
+1006,Farid Haidari,64.20,2026-01-06,us-east
+1007,Grace Liu,305.40,2026-01-07,ap-south
+1008,Hassan Malik,18.99,2026-01-07,eu-west
+1009,Ines Duarte,77.10,2026-01-08,us-east
+1010,Jonas Weber,150.60,2026-01-09,eu-west
