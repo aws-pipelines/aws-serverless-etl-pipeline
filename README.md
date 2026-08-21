@@ -34,7 +34,7 @@ flowchart LR
 
 ## One-time setup (requires local AWS CLI + Terraform)
 
-Like the [ECS CI/CD pipeline](https://github.com/mhassanahmed8537/aws-ecs-cicd-pipeline) in this series, this is the "codified IaC" showcase, meant to be applied with Terraform rather than clicked through the console.
+Like the [ECS CI/CD pipeline](https://github.com/aws-pipelines/aws-ecs-cicd-pipeline) in this series, this is the "codified IaC" showcase, meant to be applied with Terraform rather than clicked through the console.
 
 ```bash
 cd terraform
